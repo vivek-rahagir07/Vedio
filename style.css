@@ -23,11 +23,87 @@ html, body {
   cursor: pointer;
 }
 
+/* ============================================================
+   ATMOSPHERIC BACKGROUND MEDIA (PHOTO CAROUSEL & VIDEO)
+   ============================================================ */
+.background-media-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: #050608;
+}
+
+/* Photo Carousel for Act I (Less Opacity) */
+.photo-carousel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.photo-carousel.fade-out {
+  opacity: 0;
+}
+
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+  opacity: 0;
+  filter: contrast(1.05) brightness(0.72);
+  transform: scale(0.98);
+  transition: opacity 1.8s ease-in-out, transform 4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.carousel-slide.active {
+  opacity: 0.32; /* Well-fitted, clear and atmospheric */
+  transform: scale(1); /* Settles at true scale, zero oversized expansion */
+}
+
+/* Background Video for Climax & Passage (Well Fitted) */
+.bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  opacity: 0;
+  filter: contrast(1.05) brightness(0.78);
+  transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
+}
+
+.bg-video.active {
+  opacity: 0.42; /* Well-fitted video opacity under narrative text */
+}
+
+/* Dark Cinematic Vignette & Dual Gradient Overlay */
+.media-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(5, 6, 8, 0.45) 0%, rgba(5, 6, 8, 0.85) 75%, #050608 100%),
+              linear-gradient(to bottom, rgba(5, 6, 8, 0.65) 0%, transparent 30%, transparent 70%, rgba(5, 6, 8, 0.85) 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
 /* Atmospheric Stardust Canvas (Zero boundaries) */
 .particles-layer {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
   pointer-events: none;
   opacity: 0.65;
 }
@@ -37,7 +113,7 @@ html, body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 4;
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
@@ -211,55 +287,104 @@ html, body {
 }
 
 /* ============================================================
-   ZERO-SHIFT CHARACTER SLOTS FOR UNSCRAMBLE
-   Guarantees 100% rock-solid fixed layout with zero jumping
+   CLIMAX REVEAL: CINEMATIC SUSPENSE & GOLDEN LIGHT-SWEEP
+   High-end cinematic reveal for "NOT A GOOD person."
    ============================================================ */
-.u-char {
-  display: inline-block;
-  width: 0.65em;
-  text-align: center;
-  vertical-align: baseline;
+
+/* Suspense Dimming on Prefix */
+.static-prefix.climax-dim {
+  opacity: 0.3;
+  filter: blur(1.5px);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s ease;
 }
 
-.u-space {
-  display: inline-block;
-  width: 0.32em;
-}
-
-.static-prefix.is-unscrambling {
-  font-family: 'Plus Jakarta Sans', monospace, sans-serif;
-  letter-spacing: 0.02em;
+/* Climax Surge on Prefix */
+.static-prefix.climax-surge {
+  opacity: 1;
+  filter: none;
   color: #ffffff;
-  text-shadow: -1px 0 rgba(5, 223, 102, 0.8), 1px 0 rgba(255, 27, 141, 0.8);
+  text-shadow: 0 0 25px rgba(255, 255, 255, 0.5), 0 4px 18px rgba(0, 0, 0, 0.9);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.35s ease;
 }
 
-.role-text.is-unscrambling {
-  font-family: 'Plus Jakarta Sans', monospace, sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #cca43b;
-  text-shadow: -1px 0 rgba(5, 223, 102, 0.8), 1px 0 rgba(255, 27, 141, 0.8);
+/* Dissolve out previous word before climax */
+.role-text.climax-dissolve {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(-3px);
+  transition: opacity 0.4s ease, filter 0.4s ease, transform 0.4s ease;
 }
 
-.u-char.resolved {
-  color: inherit;
-  text-shadow: none;
+/* Grand Cinematic Focus-Pull Reveal of 'person.' */
+.role-text.climax-reveal {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  animation: cinematicPersonReveal 950ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Fixed-Screen Statement Pop-Out (Subtle, crisp, non-disruptive) */
-.kinetic-statement.statement-popout {
-  animation: statementPopOut 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes statementPopOut {
+@keyframes cinematicPersonReveal {
   0% {
-    transform: scale(0.96);
-    filter: drop-shadow(0 0 12px rgba(204, 164, 59, 0.6)) drop-shadow(-2px 0 #05df66) drop-shadow(2px 0 #ff1b8d);
+    opacity: 0;
+    filter: blur(14px) drop-shadow(0 0 30px rgba(204, 164, 59, 0.9));
+    transform: translateY(4px) scale(0.94);
+    letter-spacing: 0.05em;
+  }
+  38% {
+    opacity: 1;
+    filter: blur(3px) drop-shadow(0 0 25px rgba(204, 164, 59, 0.85));
+    transform: translateY(-1px) scale(1.03);
+  }
+  75% {
+    filter: blur(0) drop-shadow(0 0 14px rgba(204, 164, 59, 0.6));
+    transform: translateY(0) scale(1.01);
+    letter-spacing: -0.01em;
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.9));
+    transform: translateY(0) scale(1);
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Luxurious Golden Light Sweep across the text */
+.role-text.golden-shimmer {
+  background: linear-gradient(
+    115deg, 
+    #cca43b 0%, 
+    #cca43b 35%, 
+    #fff5cc 50%, 
+    #cca43b 65%, 
+    #cca43b 100%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerSweep 1100ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shimmerSweep {
+  0% {
+    background-position: 180% 0;
+  }
+  100% {
+    background-position: -80% 0;
+  }
+}
+
+/* Dignified Settle of the Entire Statement */
+.kinetic-statement.climax-statement-pulse {
+  animation: climaxStatementPulse 850ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes climaxStatementPulse {
+  0% {
+    transform: scale(0.97);
   }
   45% {
-    transform: scale(1.04);
-    filter: drop-shadow(0 0 22px rgba(204, 164, 59, 0.75));
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 24px rgba(204, 164, 59, 0.55));
   }
   100% {
     transform: scale(1);
@@ -287,10 +412,10 @@ html, body {
 
 .passage-main {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(1.8rem, 6.8vw, 3.8rem);
+  font-size: clamp(1.35rem, 4.2vw, 2.5rem);
   font-weight: 600;
   font-style: italic;
-  line-height: 1.3;
+  line-height: 1.35;
   color: #ffffff;
   text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95);
 }
@@ -301,10 +426,10 @@ html, body {
 
 .passage-sub {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(1.8rem, 6.8vw, 3.8rem);
+  font-size: clamp(1.35rem, 4.2vw, 2.5rem);
   font-weight: 600;
   font-style: italic;
-  line-height: 1.3;
+  line-height: 1.35;
   margin-top: 0.6rem;
   color: #cca43b; /* Dark golden */
   text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95);

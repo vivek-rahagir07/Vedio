@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>NOT A GOOD — Good Enough For Myself</title>
+  <title>NOT A GOOD — I’ll Still Have Myself</title>
   <meta name="description" content="A minimalist cinematic typographic poem about solitude, expectations, and self-acceptance.">
   <meta name="theme-color" content="#050608">
 
@@ -15,6 +15,26 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- Atmospheric Background Media Layer (Carousel & Video) -->
+  <div class="background-media-container" id="bgMediaContainer">
+    <!-- Carousel of 4 photos for Act I (up to "not a good person") -->
+    <div class="photo-carousel" id="photoCarousel">
+      <div class="carousel-slide active" style="background-image: url('photoes/image.png');"></div>
+      <div class="carousel-slide" style="background-image: url('photoes/image%20copy.png');"></div>
+      <div class="carousel-slide" style="background-image: url('photoes/image%20copy%202.png');"></div>
+      <div class="carousel-slide" style="background-image: url('photoes/image%20copy%203.png');"></div>
+    </div>
+
+    <!-- Cinematic Video Layer (Reveals when "person." hits, plays under the narrative) -->
+    <video class="bg-video" id="bgVideo" playsinline muted loop preload="auto">
+      <source src="Untitled%20design.mp4" type="video/mp4">
+      <source src="Untitled design.mp4" type="video/mp4">
+    </video>
+
+    <!-- Dark Cinematic Vignette Overlay -->
+    <div class="media-overlay"></div>
+  </div>
 
   <!-- Subtle Atmospheric Stardust Canvas (No boundaries) -->
   <canvas class="particles-layer" id="particlesCanvas"></canvas>

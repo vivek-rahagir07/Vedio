@@ -32,28 +32,13 @@
       delay: 3800 
     },
 
-    // ACT III: THE REALIZATION & ACCEPTANCE
+    // ACT III: THE REALIZATION & RESOLUTION
     { 
       type: 'passage', 
       main: 'Because when no one is left to understand me,', 
       sub: 'I’ll still have myself.', 
       mainGold: false,
-      delay: 4200 
-    },
-    { 
-      type: 'passage', 
-      main: 'And maybe being alone', 
-      sub: 'is not my punishment—', 
-      mainGold: false,
-      subWhite: true,
-      delay: 3800 
-    },
-    { 
-      type: 'passage', 
-      main: 'maybe it’s the place where I finally become', 
-      sub: 'good enough for myself.', 
-      mainGold: false,
-      delay: 6000 
+      delay: 6500 
     }
   ];
 
@@ -78,6 +63,50 @@
   const passageStatement = document.getElementById('passageStatement');
   const passageMain = document.getElementById('passageMain');
   const passageSub = document.getElementById('passageSub');
+
+  // Background Media Elements
+  const photoCarousel = document.getElementById('photoCarousel');
+  const carouselSlides = document.querySelectorAll('.carousel-slide');
+  const bgVideo = document.getElementById('bgVideo');
+
+  let currentSlideIndex = 0;
+
+  function showSlide(index) {
+    if (!carouselSlides || carouselSlides.length === 0) return;
+    carouselSlides.forEach((slide, i) => {
+      if (i === index) {
+        slide.classList.add('active');
+      } else {
+        slide.classList.remove('active');
+      }
+    });
+    currentSlideIndex = index;
+  }
+
+  function updateBackgroundMedia(stepIndex, stepType) {
+    // Act I: 12 roles up to 'fighter.' -> Photo carousel active, video paused
+    if (stepType === 'kinetic') {
+      if (photoCarousel) photoCarousel.classList.remove('fade-out');
+      if (bgVideo) {
+        bgVideo.classList.remove('active');
+        try { bgVideo.pause(); } catch (_) {}
+      }
+
+      // Rotate through 4 photos smoothly across the 12 roles (every 3 roles)
+      const targetSlide = Math.floor(stepIndex / 3) % carouselSlides.length;
+      if (targetSlide !== currentSlideIndex) {
+        showSlide(targetSlide);
+      }
+    } 
+    // Climax & Passages: 'person.' and narrative -> Video active with low opacity, carousel fades out
+    else if (stepType === 'climax-person' || stepType === 'passage') {
+      if (photoCarousel) photoCarousel.classList.add('fade-out');
+      if (bgVideo) {
+        bgVideo.classList.add('active');
+        bgVideo.play().catch(() => {});
+      }
+    }
+  }
 
   // ------------------------------------------------------------
   // PROCEDURAL AUDIO SYNTHESIZER
@@ -149,22 +178,37 @@
     if (!audioCtx) return;
     try {
       const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(110, now);
-      osc.frequency.exponentialRampToValueAtTime(42, now + 1.8);
+      // 1. Deep Sub-bass Drop (Impact)
+      const sub = audioCtx.createOscillator();
+      const subGain = audioCtx.createGain();
+      sub.type = 'triangle';
+      sub.frequency.setValueAtTime(95, now);
+      sub.frequency.exponentialRampToValueAtTime(36, now + 2.0);
 
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.25, now + 0.25);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+      subGain.gain.setValueAtTime(0.001, now);
+      subGain.gain.linearRampToValueAtTime(0.32, now + 0.18);
+      subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.6);
 
-      osc.connect(gain);
-      gain.connect(masterGain);
+      sub.connect(subGain);
+      subGain.connect(masterGain);
+      sub.start(now);
+      sub.stop(now + 2.7);
 
-      osc.start(now);
-      osc.stop(now + 2.5);
+      // 2. Warm Cinematic Resonant Tone (C3 / 130.81Hz)
+      const tone = audioCtx.createOscillator();
+      const toneGain = audioCtx.createGain();
+      tone.type = 'sine';
+      tone.frequency.setValueAtTime(130.81, now);
+
+      toneGain.gain.setValueAtTime(0.001, now);
+      toneGain.gain.linearRampToValueAtTime(0.12, now + 0.12);
+      toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+
+      tone.connect(toneGain);
+      toneGain.connect(masterGain);
+      tone.start(now);
+      tone.stop(now + 2.3);
     } catch (_) {}
   }
 
@@ -255,75 +299,52 @@
   }
 
   // ------------------------------------------------------------
-  // HACKER UNSCRAMBLE & POP-OUT REVEAL FOR ENTIRE "NOT A GOOD PERSON."
+  // CINEMATIC CLIMAX REVEAL: SUSPENSE, FOCUS-PULL & GOLDEN SHIMMER
+  // High-end cinematic reveal for "NOT A GOOD person."
   // ------------------------------------------------------------
-  let unscrambleTimer = null;
+  let climaxTimer = null;
 
-  function runCompleteUnscrambleReveal(onDone) {
-    clearInterval(unscrambleTimer);
+  function runCinematicClimaxReveal(onDone) {
+    clearTimeout(climaxTimer);
 
-    const targetPrefix = 'NOT A GOOD';
-    const targetWord = 'person.';
+    // PHASE 1: Dramatic Suspense Breath (420ms)
+    // The previous word dissolves into darkness, prefix dims into suspense
+    if (staticPrefix) {
+      staticPrefix.className = 'static-prefix climax-dim';
+    }
+    roleText.className = 'role-text climax-dissolve';
+    kineticStatement.classList.remove('climax-statement-pulse');
 
-    if (staticPrefix) staticPrefix.classList.add('is-unscrambling');
-    roleText.classList.add('is-unscrambling');
-    kineticStatement.classList.remove('statement-popout');
+    // Begin crossfading from photo carousel to video
+    if (photoCarousel) photoCarousel.classList.add('fade-out');
 
-    const chars = '!<>-_/[]{}—=+*^?#0101XYZKQ$&%';
-    let frame = 0;
-    const totalFrames = 26; // ~730ms duration (26 * 28ms)
-
-    unscrambleTimer = setInterval(() => {
-      frame++;
-      const progress = frame / totalFrames;
-
-      // 1. Unscramble Prefix "NOT A GOOD"
-      let prefixOutput = '';
-      for (let i = 0; i < targetPrefix.length; i++) {
-        if (targetPrefix[i] === ' ') {
-          prefixOutput += ' ';
-        } else if (progress > (i + 1) / (targetPrefix.length + 1)) {
-          prefixOutput += targetPrefix[i];
-        } else {
-          prefixOutput += chars[Math.floor(Math.random() * chars.length)];
-        }
+    climaxTimer = setTimeout(() => {
+      // PHASE 2: The Cinematic Surge & Golden Light-Sweep Reveal
+      if (staticPrefix) {
+        staticPrefix.className = 'static-prefix climax-surge';
+        staticPrefix.textContent = 'NOT A GOOD';
       }
-      if (staticPrefix) staticPrefix.textContent = prefixOutput;
 
-      // 2. Unscramble Word "person."
-      let wordOutput = '';
-      for (let i = 0; i < targetWord.length; i++) {
-        if (progress > (i + 1) / (targetWord.length + 1)) {
-          wordOutput += targetWord[i];
-        } else {
-          wordOutput += chars[Math.floor(Math.random() * chars.length)];
-        }
+      roleText.className = 'role-text climax-reveal golden-shimmer';
+      roleText.textContent = 'person.';
+      roleText.setAttribute('data-text', 'person.');
+
+      // Reveal and play the background video with subtle low opacity
+      if (bgVideo) {
+        bgVideo.classList.add('active');
+        bgVideo.play().catch(() => {});
       }
-      roleText.textContent = wordOutput;
-      roleText.setAttribute('data-text', wordOutput);
 
-      playDataTick();
+      // Settle pulse across the entire statement
+      kineticStatement.classList.remove('climax-statement-pulse');
+      void kineticStatement.offsetWidth;
+      kineticStatement.classList.add('climax-statement-pulse');
 
-      // On Completion: LOCK IN AND POP OUT THE ENTIRE STATEMENT!
-      if (frame >= totalFrames) {
-        clearInterval(unscrambleTimer);
-        if (staticPrefix) {
-          staticPrefix.classList.remove('is-unscrambling');
-          staticPrefix.textContent = targetPrefix;
-        }
-        roleText.classList.remove('is-unscrambling');
-        roleText.textContent = targetWord;
-        roleText.setAttribute('data-text', targetWord);
+      // Deep cinematic sub-bass resonance + golden harmonic impact
+      playSubSwell();
 
-        // One-time explosive POP-OUT on the entire statement
-        kineticStatement.classList.remove('statement-popout');
-        void kineticStatement.offsetWidth;
-        kineticStatement.classList.add('statement-popout');
-
-        playSubSwell();
-        if (onDone) onDone();
-      }
-    }, 28);
+      if (onDone) onDone();
+    }, 420);
   }
 
   // ------------------------------------------------------------
@@ -333,15 +354,19 @@
     currentIndex = Math.max(0, Math.min(idx, TIMELINE.length - 1));
     const step = TIMELINE[currentIndex];
 
+    // Clean up any pending climax timers
+    clearTimeout(climaxTimer);
+
+    // Sync background media (carousel for Act I, video for person & passages)
+    updateBackgroundMedia(currentIndex, step.type);
+
     // 1. ACT I: NOT A GOOD [role]
     if (step.type === 'kinetic') {
-      clearInterval(unscrambleTimer);
-      kineticStatement.classList.remove('statement-popout');
+      kineticStatement.classList.remove('climax-statement-pulse');
       if (staticPrefix) {
-        staticPrefix.classList.remove('is-unscrambling');
+        staticPrefix.className = 'static-prefix';
         staticPrefix.textContent = 'NOT A GOOD';
       }
-      roleText.classList.remove('is-unscrambling');
 
       kineticStatement.classList.remove('hidden');
       passageStatement.classList.add('hidden');
@@ -356,34 +381,30 @@
         playNote(currentIndex);
       }
     } 
-    // Special Complete 'NOT A GOOD PERSON.' Unscramble & Pop-Out Reveal
+    // Special Cinematic Reveal for 'NOT A GOOD person.'
     else if (step.type === 'climax-person') {
       kineticStatement.classList.remove('hidden');
       passageStatement.classList.add('hidden');
 
       if (triggerGlitch) {
-        runCompleteUnscrambleReveal();
+        runCinematicClimaxReveal();
       } else {
-        clearInterval(unscrambleTimer);
         if (staticPrefix) {
-          staticPrefix.classList.remove('is-unscrambling');
+          staticPrefix.className = 'static-prefix climax-surge';
           staticPrefix.textContent = 'NOT A GOOD';
         }
-        roleText.classList.remove('is-unscrambling');
-        roleText.className = 'role-text';
+        roleText.className = 'role-text climax-reveal golden-shimmer';
         roleText.textContent = 'person.';
         roleText.setAttribute('data-text', 'person.');
       }
     } 
     // 2. ACT II & III: NARRATIVE PASSAGE
     else if (step.type === 'passage') {
-      clearInterval(unscrambleTimer);
-      kineticStatement.classList.remove('statement-popout');
+      kineticStatement.classList.remove('climax-statement-pulse');
       if (staticPrefix) {
-        staticPrefix.classList.remove('is-unscrambling');
+        staticPrefix.className = 'static-prefix';
         staticPrefix.textContent = 'NOT A GOOD';
       }
-      roleText.classList.remove('is-unscrambling');
 
       kineticStatement.classList.add('hidden');
       passageStatement.classList.remove('hidden');
@@ -433,7 +454,7 @@
   }
 
   function stepNext() {
-    clearInterval(unscrambleTimer);
+    clearTimeout(climaxTimer);
     if (currentIndex < TIMELINE.length - 1) {
       renderStep(currentIndex + 1, true);
       scheduleNext();
@@ -445,7 +466,7 @@
   }
 
   function stepPrev() {
-    clearInterval(unscrambleTimer);
+    clearTimeout(climaxTimer);
     if (currentIndex > 0) {
       renderStep(currentIndex - 1, true);
       if (isPlaying) scheduleNext();
@@ -513,6 +534,7 @@
   // INITIALIZATION
   // ------------------------------------------------------------
   initParticles();
+  showSlide(0);
   renderStep(0, false);
   scheduleNext();
 })();
