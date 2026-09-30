@@ -3,91 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>NOT A GOOD...</title>
-  <meta name="description" content="A soothing, minimalist cinematic mobile typographic experience.">
+  <title>NOT A GOOD — Good Enough For Myself</title>
+  <meta name="description" content="A minimalist cinematic typographic poem about solitude, expectations, and self-acceptance.">
+  <meta name="theme-color" content="#050608">
+
+  <!-- Google Fonts: Cormorant Garamond & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;600;700&family=Inter:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Ambient background glow elements -->
-  <div class="ambient-backdrop" id="ambientBackdrop"></div>
 
-  <!-- Mobile Reel Frame / Viewport Container -->
-  <div class="mobile-viewport" id="mobileViewport">
-    <!-- Screen background that can transition smoothly from deep black to soothing light -->
-    <div class="screen-canvas" id="screenCanvas">
-      
-      <!-- Subtle texture -->
-      <div class="screen-grain"></div>
+  <!-- Subtle Atmospheric Stardust Canvas (No boundaries) -->
+  <canvas class="particles-layer" id="particlesCanvas"></canvas>
 
-      <!-- Centered Typographic Stage -->
-      <div class="typography-stage" id="typographyStage">
-        <!-- 
-          Fixed split: Left side ends right at center line (50%).
-          Right side begins right at center line (50%).
-          "NOT A GOOD" is 100% stationary, never shifting.
-        -->
-        <div class="stage-col col-left">
-          <span class="prefix" id="prefixText">NOT A GOOD</span>
-        </div>
-        <div class="stage-col col-right">
-          <span class="dynamic-word" id="dynamicWord" data-text="son.">son.</span>
-        </div>
-      </div>
+  <!-- Film Grain Texture -->
+  <div class="film-grain"></div>
 
-      <!-- Special Climax Canvas (Appears during the soothing finale) -->
-      <div class="soothing-climax-stage" id="soothingClimaxStage">
-        <div class="climax-phrase">
-          <span class="climax-prefix" id="climaxPrefix">not a good</span>
-          <span class="climax-word" id="climaxWord">person.</span>
-        </div>
-        <p class="climax-subtext" id="climaxSubtext">just trying my best.</p>
-      </div>
-
-      <!-- Discrete Mobile Controls Pill (Auto-hides) -->
-      <div class="mobile-hud" id="mobileHud">
-        <button class="hud-btn" id="prevBtn" title="Previous word" aria-label="Previous">
-          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
-        </button>
-
-        <button class="hud-btn hud-play-btn" id="playPauseBtn" title="Play / Pause" aria-label="Play or Pause">
-          <svg id="playIcon" class="hidden" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
-          <svg id="pauseIcon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-        </button>
-
-        <button class="hud-btn" id="nextBtn" title="Next word" aria-label="Next">
-          <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
-        </button>
-
-        <div class="hud-sep"></div>
-
-        <button class="hud-btn hud-pill-txt" id="speedBtn" title="Pacing">1.4s</button>
-        
-        <button class="hud-btn" id="soundBtn" title="Soft acoustic tap sound" aria-label="Sound Toggle">
-          <svg id="soundMutedIcon" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-            <line x1="1" y1="1" x2="23" y2="23"></line>
-            <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
-            <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0a7 7 0 0 1-.11 1.23"></path>
-            <line x1="12" y1="19" x2="12" y2="23"></line>
-          </svg>
-          <svg id="soundActiveIcon" class="hidden" viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-        </button>
-
-        <button class="hud-btn hud-pill-txt" id="modeBtn" title="Toggle Frame (Mobile / Fullscreen)">9:16</button>
-      </div>
-
-      <!-- Minimal Progress Indicator -->
-      <div class="progress-track">
-        <div class="progress-thumb" id="progressThumb"></div>
-      </div>
-
+  <!-- Main Fullscreen Stage: Pure Text Only -->
+  <main class="text-stage" id="textStage">
+    
+    <!-- ACT I: Centered Statement (Zero Movement in NOT A GOOD) -->
+    <div class="kinetic-statement" id="kineticStatement">
+      <span class="static-prefix" id="staticPrefix">NOT A GOOD</span>
+      <span class="word-slot">
+        <span class="role-text" id="roleText" data-text="son.">son.</span>
+      </span>
     </div>
-  </div>
+
+    <!-- ACT II & III: Narrative Passage -->
+    <div class="passage-statement hidden" id="passageStatement">
+      <h1 class="passage-main" id="passageMain">But maybe that’s okay.</h1>
+      <p class="passage-sub hidden" id="passageSub"></p>
+    </div>
+
+  </main>
 
   <script src="app.js"></script>
 </body>
