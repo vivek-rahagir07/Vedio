@@ -8,37 +8,37 @@
   // POEM TIMELINE (The Complete Journey)
   // ------------------------------------------------------------
   const TIMELINE = [
-    // ACT I: NOT A GOOD [role]
-    { type: 'kinetic', text: 'son.', delay: 1300 },
-    { type: 'kinetic', text: 'friend.', delay: 1300 },
-    { type: 'kinetic', text: 'student.', delay: 1300 },
-    { type: 'kinetic', text: 'partner.', delay: 1300 },
-    { type: 'kinetic', text: 'brother.', delay: 1300 },
-    { type: 'kinetic', text: 'listener.', delay: 1300 },
-    { type: 'kinetic', text: 'supporter.', delay: 1300 },
-    { type: 'kinetic', text: 'creator.', delay: 1300 },
-    { type: 'kinetic', text: 'leader.', delay: 1300 },
-    { type: 'kinetic', text: 'teammate.', delay: 1300 },
-    { type: 'kinetic', text: 'dreamer.', delay: 1300 },
-    { type: 'kinetic', text: 'fighter.', delay: 1300 },
-    { type: 'climax-person', text: 'person.', delay: 3800 },
+    // ACT I: Accelerating Tempo Curve (Starts with good gap, ramps into rapid-fire blitz)
+    { type: 'kinetic', text: 'son.', delay: 1300 },       // Initial spacious gap
+    { type: 'kinetic', text: 'friend.', delay: 1100 },    // Good gap
+    { type: 'kinetic', text: 'student.', delay: 900 },    // Starting to build
+    { type: 'kinetic', text: 'partner.', delay: 720 },
+    { type: 'kinetic', text: 'brother.', delay: 560 },
+    { type: 'kinetic', text: 'listener.', delay: 420 },
+    { type: 'kinetic', text: 'supporter.', delay: 320 },
+    { type: 'kinetic', text: 'creator.', delay: 240 },
+    { type: 'kinetic', text: 'leader.', delay: 180 },
+    { type: 'kinetic', text: 'teammate.', delay: 140 },
+    { type: 'kinetic', text: 'dreamer.', delay: 120 },
+    { type: 'kinetic', text: 'fighter.', delay: 100 },    // Ultra-fast blitz
+    { type: 'climax-person', text: 'person.', delay: 2600 }, // THE BLAST! (Holds 2.6s on black screen)
 
-    // ACT II: THE SHIFT
+    // ACT II: THE SHIFT (Video begins playing under text)
     { 
       type: 'passage', 
       main: 'But maybe that’s okay.', 
       sub: '', 
       mainGold: false,
-      delay: 3800 
+      delay: 2400 
     },
 
-    // ACT III: THE REALIZATION & RESOLUTION
+    // ACT III: THE REALIZATION & RESOLUTION (Completes with video in 6s)
     { 
       type: 'passage', 
-      main: 'Because when no one is left to understand me,', 
+      main: 'Because when no one is left<br>to understand me,', 
       sub: 'I’ll still have myself.', 
       mainGold: false,
-      delay: 6500 
+      delay: 3800 
     }
   ];
 
@@ -57,6 +57,7 @@
   // DOM REFERENCES
   // ------------------------------------------------------------
   const particlesCanvas = document.getElementById('particlesCanvas');
+  const textStage = document.getElementById('textStage');
   const kineticStatement = document.getElementById('kineticStatement');
   const staticPrefix = document.getElementById('staticPrefix');
   const roleText = document.getElementById('roleText');
@@ -70,17 +71,36 @@
   const bgVideo = document.getElementById('bgVideo');
 
   let currentSlideIndex = 0;
+  let carouselInterval = null;
 
   function showSlide(index) {
     if (!carouselSlides || carouselSlides.length === 0) return;
+    const targetIdx = Math.abs(index) % carouselSlides.length;
     carouselSlides.forEach((slide, i) => {
-      if (i === index) {
+      if (i === targetIdx) {
         slide.classList.add('active');
       } else {
         slide.classList.remove('active');
       }
     });
-    currentSlideIndex = index;
+    currentSlideIndex = targetIdx;
+  }
+
+  function startCarouselTimer() {
+    stopCarouselTimer();
+    // Rotate every 1500ms so all 4 photos get an equal, beautiful ~1.5s display across Act I
+    carouselInterval = setInterval(() => {
+      if (currentIndex < 12 && isPlaying) {
+        showSlide(currentSlideIndex + 1);
+      }
+    }, 1500);
+  }
+
+  function stopCarouselTimer() {
+    if (carouselInterval) {
+      clearInterval(carouselInterval);
+      carouselInterval = null;
+    }
   }
 
   function updateBackgroundMedia(stepIndex, stepType) {
@@ -92,18 +112,31 @@
         try { bgVideo.pause(); } catch (_) {}
       }
 
-      // Rotate through 4 photos smoothly across the 12 roles (every 3 roles)
-      const targetSlide = Math.floor(stepIndex / 3) % carouselSlides.length;
-      if (targetSlide !== currentSlideIndex) {
-        showSlide(targetSlide);
+      // If at start (step 0), reset to slide 0 and restart smooth 1.5s carousel timer
+      if (stepIndex === 0) {
+        showSlide(0);
+        startCarouselTimer();
       }
     } 
-    // Climax & Passages: 'person.' and narrative -> Video active with low opacity, carousel fades out
-    else if (stepType === 'climax-person' || stepType === 'passage') {
+    // "NOT A GOOD person." -> PURE BLACK SCREEN (Both carousel and video are hidden)
+    else if (stepType === 'climax-person') {
+      stopCarouselTimer();
+      if (photoCarousel) photoCarousel.classList.add('fade-out');
+      if (bgVideo) {
+        bgVideo.classList.remove('active');
+        try { bgVideo.pause(); } catch (_) {}
+      }
+    }
+    // AFTER person -> Video reveals and plays for 6 seconds under the narrative text
+    else if (stepType === 'passage') {
+      stopCarouselTimer();
       if (photoCarousel) photoCarousel.classList.add('fade-out');
       if (bgVideo) {
         bgVideo.classList.add('active');
-        bgVideo.play().catch(() => {});
+        if (bgVideo.paused) {
+          bgVideo.currentTime = 0;
+          bgVideo.play().catch(() => {});
+        }
       }
     }
   }
@@ -212,6 +245,61 @@
     } catch (_) {}
   }
 
+  // Heavy sonic detonation for the BLASTING reveal of "NOT A GOOD person."
+  function playBlastDetonation() {
+    if (!audioCtx) return;
+    try {
+      const now = audioCtx.currentTime;
+
+      // 1. Heavy Sub-bass Boom (Glide down to 26Hz)
+      const sub = audioCtx.createOscillator();
+      const subGain = audioCtx.createGain();
+      sub.type = 'triangle';
+      sub.frequency.setValueAtTime(125, now);
+      sub.frequency.exponentialRampToValueAtTime(26, now + 2.4);
+
+      subGain.gain.setValueAtTime(0.001, now);
+      subGain.gain.linearRampToValueAtTime(0.48, now + 0.04);
+      subGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.8);
+
+      sub.connect(subGain);
+      subGain.connect(masterGain);
+      sub.start(now);
+      sub.stop(now + 2.9);
+
+      // 2. Punch Transient Kick
+      const kick = audioCtx.createOscillator();
+      const kickGain = audioCtx.createGain();
+      kick.type = 'sine';
+      kick.frequency.setValueAtTime(180, now);
+      kick.frequency.exponentialRampToValueAtTime(45, now + 0.28);
+
+      kickGain.gain.setValueAtTime(0.001, now);
+      kickGain.gain.linearRampToValueAtTime(0.42, now + 0.015);
+      kickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+
+      kick.connect(kickGain);
+      kickGain.connect(masterGain);
+      kick.start(now);
+      kick.stop(now + 0.35);
+
+      // 3. Crystalline High Shimmer / Sonic Ring
+      const chime = audioCtx.createOscillator();
+      const chimeGain = audioCtx.createGain();
+      chime.type = 'sine';
+      chime.frequency.setValueAtTime(1046.5, now);
+
+      chimeGain.gain.setValueAtTime(0.001, now);
+      chimeGain.gain.linearRampToValueAtTime(0.09, now + 0.02);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+
+      chime.connect(chimeGain);
+      chimeGain.connect(masterGain);
+      chime.start(now);
+      chime.stop(now + 1.8);
+    } catch (_) {}
+  }
+
   // Chime chord for epiphanies
   function playEpiphanyChord() {
     if (!audioCtx) return;
@@ -307,19 +395,19 @@
   function runCinematicClimaxReveal(onDone) {
     clearTimeout(climaxTimer);
 
-    // PHASE 1: Dramatic Suspense Breath (420ms)
-    // The previous word dissolves into darkness, prefix dims into suspense
+    // Micro 130ms blackout freeze right before the blast
     if (staticPrefix) {
       staticPrefix.className = 'static-prefix climax-dim';
     }
     roleText.className = 'role-text climax-dissolve';
-    kineticStatement.classList.remove('climax-statement-pulse');
+    kineticStatement.classList.remove('statement-blast');
+    if (textStage) textStage.classList.remove('blast-flash');
 
-    // Begin crossfading from photo carousel to video
+    // Ensure photo carousel is faded out (pure black screen)
     if (photoCarousel) photoCarousel.classList.add('fade-out');
 
     climaxTimer = setTimeout(() => {
-      // PHASE 2: The Cinematic Surge & Golden Light-Sweep Reveal
+      // THE EXPLOSIVE BLAST!
       if (staticPrefix) {
         staticPrefix.className = 'static-prefix climax-surge';
         staticPrefix.textContent = 'NOT A GOOD';
@@ -329,22 +417,23 @@
       roleText.textContent = 'person.';
       roleText.setAttribute('data-text', 'person.');
 
-      // Reveal and play the background video with subtle low opacity
-      if (bgVideo) {
-        bgVideo.classList.add('active');
-        bgVideo.play().catch(() => {});
+      // Blasting impact on the entire statement
+      kineticStatement.classList.remove('statement-blast');
+      void kineticStatement.offsetWidth;
+      kineticStatement.classList.add('statement-blast');
+
+      // Shockwave flash across screen
+      if (textStage) {
+        textStage.classList.remove('blast-flash');
+        void textStage.offsetWidth;
+        textStage.classList.add('blast-flash');
       }
 
-      // Settle pulse across the entire statement
-      kineticStatement.classList.remove('climax-statement-pulse');
-      void kineticStatement.offsetWidth;
-      kineticStatement.classList.add('climax-statement-pulse');
-
-      // Deep cinematic sub-bass resonance + golden harmonic impact
-      playSubSwell();
+      // Heavy sonic detonation
+      playBlastDetonation();
 
       if (onDone) onDone();
-    }, 420);
+    }, 130);
   }
 
   // ------------------------------------------------------------
@@ -362,7 +451,8 @@
 
     // 1. ACT I: NOT A GOOD [role]
     if (step.type === 'kinetic') {
-      kineticStatement.classList.remove('climax-statement-pulse');
+      kineticStatement.classList.remove('statement-blast');
+      if (textStage) textStage.classList.remove('blast-flash');
       if (staticPrefix) {
         staticPrefix.className = 'static-prefix';
         staticPrefix.textContent = 'NOT A GOOD';
@@ -400,7 +490,8 @@
     } 
     // 2. ACT II & III: NARRATIVE PASSAGE
     else if (step.type === 'passage') {
-      kineticStatement.classList.remove('climax-statement-pulse');
+      kineticStatement.classList.remove('statement-blast');
+      if (textStage) textStage.classList.remove('blast-flash');
       if (staticPrefix) {
         staticPrefix.className = 'static-prefix';
         staticPrefix.textContent = 'NOT A GOOD';
@@ -409,7 +500,7 @@
       kineticStatement.classList.add('hidden');
       passageStatement.classList.remove('hidden');
 
-      passageMain.textContent = step.main;
+      passageMain.innerHTML = step.main;
       if (step.mainGold) {
         passageMain.classList.add('gold-text');
       } else {
@@ -417,7 +508,7 @@
       }
 
       if (step.sub) {
-        passageSub.textContent = step.sub;
+        passageSub.innerHTML = step.sub;
         passageSub.classList.remove('hidden');
         if (step.subWhite) {
           passageSub.classList.add('sub-white');

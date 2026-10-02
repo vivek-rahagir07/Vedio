@@ -60,18 +60,18 @@ html, body {
   background-repeat: no-repeat;
   background-position: center center;
   opacity: 0;
+  z-index: 1;
   filter: contrast(1.05) brightness(0.72);
-  transform: scale(0.98);
-  transition: opacity 1.8s ease-in-out, transform 4s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
 }
 
 .carousel-slide.active {
-  opacity: 0.32; /* Well-fitted, clear and atmospheric */
-  transform: scale(1); /* Settles at true scale, zero oversized expansion */
+  opacity: 0.38; /* Complete image clearly visible in the background */
+  z-index: 2; /* Ensures incoming slide blends on top during crossfade */
 }
 
-/* Background Video for Climax & Passage (Well Fitted) */
+/* Background Video for Climax & Passage (Complete Video Fit) */
 .bg-video {
   position: absolute;
   inset: 0;
@@ -80,13 +80,13 @@ html, body {
   object-fit: contain;
   object-position: center center;
   opacity: 0;
-  filter: contrast(1.05) brightness(0.78);
-  transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: contrast(1.08) brightness(0.85);
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity;
 }
 
 .bg-video.active {
-  opacity: 0.42; /* Well-fitted video opacity under narrative text */
+  opacity: 0.48; /* Complete video clearly visible under narrative text */
 }
 
 /* Dark Cinematic Vignette & Dual Gradient Overlay */
@@ -185,9 +185,9 @@ html, body {
   transform: translateZ(0);
 }
 
-/* Hacker Glitch on Word Change (Greenish & Pinkish RGB Offset) */
+/* Hacker Glitch on Word Change (Greenish & Pinkish RGB Offset - Fast Blitz) */
 .role-text.hacker-glitch {
-  animation: hackerJitter 200ms steps(3, start) both;
+  animation: hackerJitter 110ms steps(3, start) both;
 }
 
 .role-text.hacker-glitch::before,
@@ -207,7 +207,7 @@ html, body {
   clip-path: polygon(0 0, 100% 0, 100% 42%, 0 42%);
   transform: translate(-4px, -1px);
   opacity: 0.95;
-  animation: hackerSliceGreen 200ms steps(3, start) both;
+  animation: hackerSliceGreen 110ms steps(3, start) both;
   text-shadow: -1px 0 #05df66;
 }
 
@@ -217,7 +217,7 @@ html, body {
   clip-path: polygon(0 48%, 100% 48%, 100% 100%, 0 100%);
   transform: translate(4px, 1px);
   opacity: 0.95;
-  animation: hackerSlicePink 200ms steps(3, start) both;
+  animation: hackerSlicePink 110ms steps(3, start) both;
   text-shadow: 1px 0 #ff1b8d;
 }
 
@@ -373,23 +373,48 @@ html, body {
   }
 }
 
-/* Dignified Settle of the Entire Statement */
-.kinetic-statement.climax-statement-pulse {
-  animation: climaxStatementPulse 850ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Explosive Blasting Climax Impact on Entire Statement */
+.kinetic-statement.statement-blast {
+  animation: blastImpact 920ms cubic-bezier(0.14, 1.15, 0.28, 1) both;
 }
 
-@keyframes climaxStatementPulse {
+@keyframes blastImpact {
   0% {
-    transform: scale(0.97);
+    transform: scale(0.65);
+    filter: brightness(3.2) drop-shadow(0 0 50px rgba(255, 255, 255, 1)) drop-shadow(0 0 90px rgba(204, 164, 59, 1));
+    opacity: 0.15;
   }
-  45% {
-    transform: scale(1.03);
-    filter: drop-shadow(0 0 24px rgba(204, 164, 59, 0.55));
+  30% {
+    transform: scale(1.18);
+    filter: brightness(1.6) drop-shadow(0 0 45px rgba(204, 164, 59, 0.95)) drop-shadow(-4px 0 #05df66) drop-shadow(4px 0 #ff1b8d);
+    opacity: 1;
+  }
+  58% {
+    transform: scale(0.96);
+    filter: brightness(1.15) drop-shadow(0 0 25px rgba(204, 164, 59, 0.7));
   }
   100% {
     transform: scale(1);
-    filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.9));
+    filter: drop-shadow(0 4px 22px rgba(0, 0, 0, 0.95));
+    opacity: 1;
   }
+}
+
+/* Blasting Shockwave Flash across screen */
+.text-stage.blast-flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 245, 190, 0.4) 0%, rgba(204, 164, 59, 0.2) 38%, transparent 75%);
+  pointer-events: none;
+  z-index: 5;
+  animation: shockwaveFade 650ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shockwaveFade {
+  0% { opacity: 1; transform: scale(0.65); }
+  50% { opacity: 0.85; transform: scale(1.15); }
+  100% { opacity: 0; transform: scale(1.45); }
 }
 
 /* ============================================================
@@ -400,24 +425,33 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 90%;
+  width: 100%;
+  max-width: min(84vw, 420px);
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  text-align: center;
+  transform: translateY(16vh); /* Lowered placement to clear the subject's face */
   transition: opacity 1s ease, transform 1s ease;
   animation: passageFloat 6s ease-in-out infinite alternate;
 }
 
 @keyframes passageFloat {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-6px); }
+  0% { transform: translateY(16vh); }
+  100% { transform: translateY(calc(16vh - 6px)); }
 }
 
 .passage-main {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(1.35rem, 4.2vw, 2.5rem);
+  font-size: clamp(1.15rem, 3.4vw, 1.85rem);
   font-weight: 600;
   font-style: italic;
-  line-height: 1.35;
+  line-height: 1.38;
   color: #ffffff;
   text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .passage-main.gold-text {
@@ -426,13 +460,16 @@ html, body {
 
 .passage-sub {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(1.35rem, 4.2vw, 2.5rem);
+  font-size: clamp(1.2rem, 3.6vw, 1.95rem);
   font-weight: 600;
   font-style: italic;
-  line-height: 1.35;
-  margin-top: 0.6rem;
+  line-height: 1.38;
+  margin-top: 0.7rem;
   color: #cca43b; /* Dark golden */
   text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .passage-sub.sub-white {
